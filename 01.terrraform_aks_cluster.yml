@@ -47,15 +47,10 @@ stages:
   - stage: TerraformDeploy
     dependsOn: TerraformValidate
     jobs:
-      - deployment: DeployAksCluster
-        displayName: DeployAksCluster
-        environment: $(env)
+      - job: TerraformDeploy
         pool:
           vmImage: $(vmimge)
-        strategy:
-         runOnce:
-           deploy:
-             steps:
+        steps:
                - task: DownloadSecureFile@1
                  displayName: Download ssh key
                  name: aks_ssh
