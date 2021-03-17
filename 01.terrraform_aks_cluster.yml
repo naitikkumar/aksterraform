@@ -8,7 +8,6 @@ trigger:
 
 variables:
   vmimage: 'ubuntu-latest'
-  evn: 'dev'
 pool:
   vmImage: $(vmimage)
 
@@ -45,7 +44,6 @@ stages:
               command: 'validate'
               allowTelemetryCollection: false
   - stage: TerraformDeploy
-    dependsOn: TerraformValidate
     jobs:
       - job: TerraformDeploy
         pool:
