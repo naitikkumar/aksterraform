@@ -1,9 +1,9 @@
 resource "azurerm_kubernetes_cluster" "aks" {
-  name                = "myakscluster"
+  name                = var.clustername
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   kubernetes_version  = data.azurerm_kubernetes_service_versions.current.latest_version
-  dns_prefix          = "aks-cluster-dns"
+  dns_prefix          = "${azurerm_resource_group.rg.name}-cluster-dns"
   node_resource_group = "${azurerm_resource_group.rg.name}-node-rg"
   default_node_pool {
     name                 = "systempool"

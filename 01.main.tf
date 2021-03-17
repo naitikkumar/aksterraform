@@ -16,12 +16,14 @@ terraform {
       version = "3.1.0"
     }
   }
-  backend "azurerm" {
-    resource_group_name  = "terrform_rg"
-    storage_account_name = "terraformtfstateyd"
-    container_name       = "statefiles"
-    key                  = "uat.terraform.tfstate"
-  }
+  # Comment Terraform Backend, because we are going to configure that in Azure DevOps
+
+ # backend "azurerm" {
+  #  resource_group_name  = "terrform_rg"
+ #   storage_account_name = "terraformtfstateyd"
+ #   container_name       = "statefiles"
+ #   key                  = "uat.terraform.tfstate"
+ # }
 }
 
 provider "azurerm" {

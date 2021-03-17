@@ -1,6 +1,6 @@
 variable "ssh_key" {
   description = "location of ssh key"
-  default     = "C:/keys/id_rsa.pub"
+ # default     = "C:/keys/id_rsa.pub" because we are using it for azuer devops
 }
 
 variable "windows_admin_username" {
@@ -49,6 +49,11 @@ variable "group" {
 variable "node_rsg" {
   default     = "aks_cluster_node_pool"
   description = "azure ad node resource group"
+}
+
+variable "clustername" {
+  default     = "myakscluster"
+  description = "azure kubernetes cluster"
 }
 
 #data source for subnet
