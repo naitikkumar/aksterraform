@@ -9,7 +9,7 @@ trigger:
 variables:
   vmimage: 'ubuntu-latest'
 pool:
-  vmImage: $vmimage
+  vmImage: $(vmimage)
 
 stages:
   - stage: TerraformValidate
