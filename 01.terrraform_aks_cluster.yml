@@ -21,7 +21,7 @@ stages:
             displayName: publish terraform manifest for pipeline
             inputs:
               targetPath: '$(System.DefaultWorkingDirectory)'
-              artifact: 'terraform-manifest-out'
+              artifact: 'terraform-manifests-out'
               publishLocation: 'pipeline'
           - task: TerraformInstaller@0
             displayName: install latest version of terraform on agents
