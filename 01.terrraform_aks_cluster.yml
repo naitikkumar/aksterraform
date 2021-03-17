@@ -44,19 +44,14 @@ stages:
               command: 'validate'
               allowTelemetryCollection: false
   - stage: TerraformDeploy
-    dependsOn: TerraformValidate
     jobs:
       - job: TerraformDeploy
         continueOnError: false
-        pool:
-          vmImage: $(vmimge)
         variables:
          vmimge: 'ubuntu-latest'
+        pool:
+         vmImage: $(vmimge)
         steps:
-               - task: TerraformInstaller@0
-                 displayName: terraform install
-                 inputs:
-                   terraformVersion: 'latest'
                - task: DownloadSecureFile@1
                  displayName: Download ssh key
                  name: aks_ssh
