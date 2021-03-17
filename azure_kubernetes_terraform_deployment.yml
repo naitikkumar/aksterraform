@@ -16,70 +16,80 @@ stages:
   - stage: Terraform_validation
     jobs:
       - job: Terrform_validation
+        continueOnError: false
         steps:
-          - task: TerraformInstaller@0
-            displayName: terraform install
-            inputs:
-              terraformVersion: '0.12.3'
+         - task: PublishPipelineArtifact@1
+           displayName: publish artifact 
+           inputs:
+             targetPath: '$(Pipeline.Workspace)'
+             artifact: 'terraform-manifest-out'
+             publishLocation: 'pipeline'
 
-          - task: TerraformTaskV1@0
-            displayName: terraform init
-            inputs:
-              provider: 'azurerm'
-              command: 'init'
-              backendServiceArm: 'Terraform_aks_deploy_connection_acitve_directory'
-              backendAzureRmResourceGroupName: 'terrform_rg'
-              backendAzureRmStorageAccountName: 'terraformtfstateyd'
-              backendAzureRmContainerName: 'statefiles'
-              backendAzureRmKey: 'dev.terraform.tfstate'
+         - task: TerraformInstaller@0
+           displayName: terraform-install
+           inputs:
+             terraformVersion: 'latest'
+        
+         - task: TerraformCLI@0
+           displayName: terraform-init
+           inputs:
+             command: 'init'
+             backendType: 'azurerm'
+             backendServiceArm: 'Terraform_aks_deploy_connection_acitve_directory'
+             backendAzureRmResourceGroupName: 'terrform_rg'
+             backendAzureRmStorageAccountName: 'terraformtfstateyd'
+             backendAzureRmContainerName: 'statefiles'
+             backendAzureRmKey: 'dev-terraform.tfstate'
+             allowTelemetryCollection: false
             
-          - task: TerraformTaskV1@0
-            displayName: terraform validate
-            inputs:
-              provider: 'azurerm'
-              command: 'validate'
+         - task: TerraformCLI@0
+           displayName: terraform-validate
+           inputs:
+             command: 'validate'
+             allowTelemetryCollection: false
   - stage: Terraform_plan_apply
-    variables:
-      vmimage: 'ubuntu-latest'
-    pool:
-      vmImage: $(vmimage)
     jobs:
       - job: Terraform_plan_apply
+        variables:
+          vmimage: 'ubuntu-latest'
+        pool:
+          vmImage: $(vmimage)
         steps:
           
           - task: DownloadSecureFile@1
-            name: ssh_key
-            displayName: public ssh key
+            name: ssh
+            displayName: dowload secure ssh file
             inputs:
               secureFile: 'aks_id_rsa.pub'
-          - task: TerraformInstaller@0
-            displayName: terraform install
-            inputs:
-              terraformVersion: '0.12.3'
           
-          - task: TerraformTaskV1@0
-            displayName: terraform init
+          - task: TerraformCLI@0
+            displayName: terraform-init
             inputs:
-              provider: 'azurerm'
               command: 'init'
+              backendType: 'azurerm'
               backendServiceArm: 'Terraform_aks_deploy_connection_acitve_directory'
               backendAzureRmResourceGroupName: 'terrform_rg'
               backendAzureRmStorageAccountName: 'terraformtfstateyd'
               backendAzureRmContainerName: 'statefiles'
-              backendAzureRmKey: 'dev.terraform.tfstate'
-
-            
-          - task: TerraformTaskV1@0
+              backendAzureRmKey: 'dev-terraform.tfstate'
+              allowTelemetryCollection: false
+              workingDirectory: '$(Pipeline.Workspace)/terraform-manifest-out'
+          
+          - task: TerraformCLI@0
             displayName: terraform plan
             inputs:
-              provider: 'azurerm'
               command: 'plan'
-              commandOptions: '-var ssh_key=$(ssh_key.secureFilePath) -out dev-$(Build.BuildId)'
-              environmentServiceNameAzureRM: 'Terraform_aks_deploy_connection_acitve_directory'
-          
-          - task: TerraformTaskV1@0
+              workingDirectory: '$(Pipeline.Workspace)/terraform-manifest-out'
+              environmentServiceName: 'Terraform_aks_deploy_connection_acitve_directory'
+              commandOptions: '-var ssh_key=$(ssh.secureFilePath) -out $(Pipeline.Workspace)/terraform-manifest-out/dev-$(Build.BuildId)-out'
+              allowTelemetryCollection: false
+              
+          - task: TerraformCLI@0
             displayName: terraform apply
             inputs:
-              provider: 'azurerm'
               command: 'apply'
-              environmentServiceNameAzureRM: 'Terraform_aks_deploy_connection_acitve_directory'
+              environmentServiceName: 'Terraform_aks_deploy_connection_acitve_directory'
+              commandOptions: '$(Pipeline.Workspace)/terraform-manifest-out/dev-$(Build.BuildId)-out'
+              allowTelemetryCollection: false
+          
+          
