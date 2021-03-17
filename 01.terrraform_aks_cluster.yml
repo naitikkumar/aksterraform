@@ -44,13 +44,19 @@ stages:
               command: 'validate'
               allowTelemetryCollection: false
   - stage: TerraformDeploy
+    dependsOn: TerraformValidate
     jobs:
       - job: TerraformDeploy
+        continueOnError: false
         pool:
           vmImage: $(vmimge)
         variables:
          vmimge: 'ubuntu-latest'
         steps:
+               - task: TerraformInstaller@0
+                 displayName: terraform install
+                 inputs:
+                   terraformVersion: 'latest'
                - task: DownloadSecureFile@1
                  displayName: Download ssh key
                  name: aks_ssh
@@ -86,3 +92,10 @@ stages:
                    environmentServiceName: 'Terraform_aks_deploy_connection_acitve_directory'
                    commandOptions: '$(Build.StagingDirectory)/dev-$(Build.BuildId).out'
                    allowTelemetryCollection: false
+              
+               - task: PublishBuildArtifacts@1
+                 displayName: publish-artifact
+                 inputs:
+                   PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+                   ArtifactName: 'dev-manifest-and-plans-$(Build.BuildId)'
+                   publishLocation: 'Container'
