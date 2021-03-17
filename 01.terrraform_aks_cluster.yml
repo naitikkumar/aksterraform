@@ -8,6 +8,7 @@ trigger:
 
 variables:
   vmimage: 'ubuntu-latest'
+  evn: 'dev'
 pool:
   vmImage: $(vmimage)
 
@@ -43,3 +44,50 @@ stages:
             inputs:
               command: 'validate'
               allowTelemetryCollection: false
+  - stage: TerraformDeploy
+    dependsOn: TerraformValidate
+    jobs:
+      - deployment: DeployAksCluster
+        displayName: DeployAksCluster
+        environment: $(env)
+        pool:
+          vmImage: $(vmimge)
+        strategy:
+         runOnce:
+           deploy:
+             steps:
+               - task: DownloadSecureFile@1
+                 displayName: Download ssh key
+                 name: aks_ssh
+                 inputs:
+                   secureFile: 'aks_id_rsa.pub'
+               - task: TerraformCLI@0
+                 displayName: Terraform intialize
+                 inputs:
+                   command: 'init'
+                   workingDirectory: '$(Pipeline.Workspace)/terraform-manifest-out'
+                   backendType: 'azurerm'
+                   backendServiceArm: 'Terraform_aks_deploy_connection_acitve_directory'
+                   backendAzureRmResourceGroupName: 'terrform_rg'
+                   backendAzureRmStorageAccountName: 'terraformtfstateyd'
+                   backendAzureRmContainerName: 'statefiles'
+                   backendAzureRmKey: '$(env).terraform.tfstate'
+                   allowTelemetryCollection: false
+               
+               - task: TerraformCLI@0
+                 displayName: Terraform plan
+                 inputs:
+                   command: 'plan'
+                   workingDirectory: '$(Pipeline.Workspace)/terraform-manifest-out'
+                   environmentServiceName: 'Terraform_aks_deploy_connection_acitve_directory'
+                   commandOptions: '-var ssh_key=$(aks_ssh.secureFilePath) -out $(Pipeline.Workspace)/terraform-manifests-out/$(DEV_ENVIRONMENT)-$(Build.BuildId).out'
+                   allowTelemetryCollection: false
+              
+               - task: TerraformCLI@0
+                 displayName: Terraform apply
+                 inputs:
+                   command: 'apply'
+                   workingDirectory: '$(Pipeline.Workspace)/terraform-manifest-out'
+                   environmentServiceName: 'Terraform_aks_deploy_connection_acitve_directory'
+                   commandOptions: '$(Pipeline.Workspace)/terraform-manifests-out/$(DEV_ENVIRONMENT)-$(Build.BuildId).out'
+                   allowTelemetryCollection: false
