@@ -50,6 +50,8 @@ stages:
       - job: TerraformDeploy
         pool:
           vmImage: $(vmimge)
+        variables:
+         vmimge: 'ubuntu-latest'
         steps:
                - task: DownloadSecureFile@1
                  displayName: Download ssh key
