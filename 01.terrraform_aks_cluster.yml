@@ -66,7 +66,7 @@ stages:
                  displayName: Terraform intialize
                  inputs:
                    command: 'init'
-                   workingDirectory: '$(Build.StagingDirectory)'
+                   workingDirectory: '$(Pipeline.Workspace)/terraform-manifests-out'
                    backendType: 'azurerm'
                    backendServiceArm: 'Terraform_aks_deploy_connection_acitve_directory'
                    backendAzureRmResourceGroupName: 'terrform_rg'
@@ -79,9 +79,9 @@ stages:
                  displayName: Terraform plan
                  inputs:
                    command: 'plan'
-                   workingDirectory: '$(System.DefaultWorkingDirectory)'
+                   workingDirectory: '$(Pipeline.Workspace)/terraform-manifests-out'
                    environmentServiceName: 'Terraform_aks_deploy_connection_acitve_directory'
-                   commandOptions: '-var ssh_key=$(aks_ssh.secureFilePath) -out $(Build.StagingDirectory)/dev-$(Build.BuildId).out'
+                   commandOptions: '-var ssh_key=$(aks_ssh.secureFilePath) -out $(Pipeline.Workspace)/terraform-manifests-out/dev-$(Build.BuildId).out'
                    allowTelemetryCollection: false
               
                - task: TerraformCLI@0
@@ -90,12 +90,6 @@ stages:
                    command: 'apply'
                    workingDirectory: '$(Pipeline.Workspace)/terraform-manifest-out'
                    environmentServiceName: 'Terraform_aks_deploy_connection_acitve_directory'
-                   commandOptions: '$(Build.StagingDirectory)/dev-$(Build.BuildId).out'
+                   commandOptions: '$(Pipeline.Workspace)/terraform-manifests-out/dev-$(Build.BuildId).out'
                    allowTelemetryCollection: false
-              
-               - task: PublishBuildArtifacts@1
-                 displayName: publish-artifact
-                 inputs:
-                   PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-                   ArtifactName: 'dev-manifest-and-plans-$(Build.BuildId)'
-                   publishLocation: 'Container'
+    
