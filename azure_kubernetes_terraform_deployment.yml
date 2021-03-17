@@ -1,0 +1,85 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+variables:
+  vmimage: 'ubuntu-latest'
+
+pool:
+  vmImage: $(vmimage)
+
+stages:
+  - stage: Terraform_validation
+    jobs:
+      - job: Terrform_validation
+        steps:
+          - task: TerraformInstaller@0
+            displayName: terraform install
+            inputs:
+              terraformVersion: '0.12.3'
+
+          - task: TerraformTaskV1@0
+            displayName: terraform init
+            inputs:
+              provider: 'azurerm'
+              command: 'init'
+              backendServiceArm: 'Terraform_aks_deploy_connection_acitve_directory'
+              backendAzureRmResourceGroupName: 'terrform_rg'
+              backendAzureRmStorageAccountName: 'terraformtfstateyd'
+              backendAzureRmContainerName: 'statefiles'
+              backendAzureRmKey: 'dev.terraform.tfstate'
+            
+          - task: TerraformTaskV1@0
+            displayName: terraform validate
+            inputs:
+              provider: 'azurerm'
+              command: 'validate'
+  - stage: Terraform_plan_apply
+    variables:
+      vmimage: 'ubuntu-latest'
+    pool:
+      vmImage: $(vmimage)
+    jobs:
+      - job: Terraform_plan_apply
+        steps:
+          
+          - task: DownloadSecureFile@1
+            name: ssh_key
+            displayName: public ssh key
+            inputs:
+              secureFile: 'aks_id_rsa.pub'
+          - task: TerraformInstaller@0
+            displayName: terraform install
+            inputs:
+              terraformVersion: '0.12.3'
+          
+          - task: TerraformTaskV1@0
+            displayName: terraform init
+            inputs:
+              provider: 'azurerm'
+              command: 'init'
+              backendServiceArm: 'Terraform_aks_deploy_connection_acitve_directory'
+              backendAzureRmResourceGroupName: 'terrform_rg'
+              backendAzureRmStorageAccountName: 'terraformtfstateyd'
+              backendAzureRmContainerName: 'statefiles'
+              backendAzureRmKey: 'dev.terraform.tfstate'
+
+            
+          - task: TerraformTaskV1@0
+            displayName: terraform plan
+            inputs:
+              provider: 'azurerm'
+              command: 'plan'
+              commandOptions: '-var ssh_key=$(ssh_key.secureFilePath) -out dev-$(Build.BuildId)'
+              environmentServiceNameAzureRM: 'Terraform_aks_deploy_connection_acitve_directory'
+          
+          - task: TerraformTaskV1@0
+            displayName: terraform apply
+            inputs:
+              provider: 'azurerm'
+              command: 'apply'
+              environmentServiceNameAzureRM: 'Terraform_aks_deploy_connection_acitve_directory'
