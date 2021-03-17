@@ -82,7 +82,7 @@ stages:
               command: 'plan'
               workingDirectory: '$(Pipeline.Workspace)/terraform-manifest-out'
               environmentServiceName: 'Terraform_aks_deploy_connection_acitve_directory'
-              commandOptions: '-var ssh_key=$(ssh.secureFilePath) -out $(Pipeline.Workspace)/terraform-manifest-out/dev-$(Build.BuildId)-out'
+              commandOptions: '-var ssh_key=$(ssh.secureFilePath) -out $(Pipeline.Workspace)/terraform-manifest-out/dev-$(Build.BuildId).out'
               allowTelemetryCollection: false
               
           - task: TerraformCLI@0
@@ -90,7 +90,7 @@ stages:
             inputs:
               command: 'apply'
               environmentServiceName: 'Terraform_aks_deploy_connection_acitve_directory'
-              commandOptions: '$(Pipeline.Workspace)/terraform-manifest-out/dev-$(Build.BuildId)-out'
+              commandOptions: '$(Pipeline.Workspace)/terraform-manifest-out/dev-$(Build.BuildId).out'
               allowTelemetryCollection: false
           
           
