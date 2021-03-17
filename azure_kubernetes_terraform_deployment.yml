@@ -50,6 +50,7 @@ stages:
   - stage: Terraform_plan_apply
     jobs:
       - job: Terraform_plan_apply
+        continueOnError: false
         variables:
           vmimage: 'ubuntu-latest'
         pool:
