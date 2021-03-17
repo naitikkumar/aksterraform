@@ -43,8 +43,6 @@ stages:
             inputs:
               command: 'validate'
               allowTelemetryCollection: false
-  - stage: TerraformDeploy
-    jobs:
       - job: TerraformDeploy
         continueOnError: false
         variables:
