@@ -57,12 +57,20 @@ stages:
           vmImage: $(vmimage)
         steps:
           
+          - task: DownloadPipelineArtifact@2
+            displayName: download pipline artificat
+            inputs:
+              buildType: 'current'
+              artifactName: 'terraform-manifest-out'
+              targetPath: '$(Pipeline.Workspace)'
+
           - task: DownloadSecureFile@1
             name: ssh
             displayName: dowload secure ssh file
             inputs:
               secureFile: 'aks_id_rsa.pub'
           
+
           - task: TerraformCLI@0
             displayName: terraform-init
             inputs:
