@@ -92,5 +92,6 @@ stages:
               environmentServiceName: 'Terraform_aks_deploy_connection_acitve_directory'
               commandOptions: '$(Pipeline.Workspace)/terraform-manifest-out/dev-$(Build.BuildId).out'
               allowTelemetryCollection: false
+              workingDirectory: '$(Pipeline.Workspace)/terraform-manifest-out'
           
           
