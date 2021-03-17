@@ -19,19 +19,18 @@ stages:
         continueOnError: false
         steps:
          - task: PublishPipelineArtifact@1
-           displayName: publish artifact 
+           displayName: publish artifact to pipelineworks
            inputs:
              targetPath: '$(Pipeline.Workspace)'
              artifact: 'terraform-manifest-out'
              publishLocation: 'pipeline'
-
          - task: TerraformInstaller@0
-           displayName: terraform-install
+           displayName: terraform install version
            inputs:
              terraformVersion: 'latest'
-        
+
          - task: TerraformCLI@0
-           displayName: terraform-init
+           displayName: terraform-initialize
            inputs:
              command: 'init'
              backendType: 'azurerm'
@@ -43,10 +42,11 @@ stages:
              allowTelemetryCollection: false
             
          - task: TerraformCLI@0
-           displayName: terraform-validate
+           displayName: terraform validate of manifests
            inputs:
              command: 'validate'
              allowTelemetryCollection: false
+
   - stage: Terraform_plan_apply
     jobs:
       - job: Terraform_plan_apply
