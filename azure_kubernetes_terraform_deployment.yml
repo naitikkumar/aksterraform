@@ -70,3 +70,20 @@ stages:
              backendAzureRmContainerName: 'statefiles'
              backendAzureRmKey: 'devops-terraform.tfstate'
              allowTelemetryCollection: false
+
+         - task: TerraformCLI@0
+           displayName: terraform plan
+           inputs:
+            command: 'plan'
+            environmentServiceName: 'Terraform_aks_deploy_connection_acitve_directory'
+            commandOptions: '-var ssh_key=$(sshkey.secureFilePath) -out $(Build.ArtifactStagingDirectory)/$(Build.BuildId)-plan.out'
+            allowTelemetryCollection: false
+        
+         - task: TerraformCLI@0
+           displayName: terraform apply
+           inputs:
+            command: 'apply'
+            workingDirectory: '$(Build.ArtifactStagingDirectory)'
+            environmentServiceName: 'Terraform_aks_deploy_connection_acitve_directory'
+            commandOptions: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId)-plan.out'
+            allowTelemetryCollection: false
