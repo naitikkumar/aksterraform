@@ -46,25 +46,17 @@ stages:
            inputs:
              command: 'validate'
              allowTelemetryCollection: false
-
-      - job: Terraform_plan_apply
-        continueOnError: false
-        variables:
-          vmimage: 'ubuntu-latest'
-        pool:
-          vmImage: $(vmimage)
-        steps:
           
-          - task: DownloadSecureFile@1
-            name: ssh
-            displayName: dowload secure ssh file
-            inputs:
+         - task: DownloadSecureFile@1
+           name: ssh
+           displayName: dowload secure ssh file
+           inputs:
               secureFile: 'aks_id_rsa.pub'
           
 
-          - task: TerraformCLI@0
-            displayName: terraform-init
-            inputs:
+         - task: TerraformCLI@0
+           displayName: terraform-init
+           inputs:
               command: 'init'
               backendType: 'azurerm'
               backendServiceArm: 'Terraform_aks_deploy_connection_acitve_directory'
@@ -75,18 +67,18 @@ stages:
               allowTelemetryCollection: false
               workingDirectory: '$(Pipeline.Workspace)/terraform-manifest-out'
           
-          - task: TerraformCLI@0
-            displayName: terraform plan
-            inputs:
+         - task: TerraformCLI@0
+           displayName: terraform plan
+           inputs:
               command: 'plan'
               workingDirectory: '$(Pipeline.Workspace)/terraform-manifest-out'
               environmentServiceName: 'Terraform_aks_deploy_connection_acitve_directory'
               commandOptions: '-var ssh_key=$(ssh.secureFilePath) -out $(Pipeline.Workspace)/terraform-manifest-out/dev-$(Build.BuildId).out'
               allowTelemetryCollection: false
               
-          - task: TerraformCLI@0
-            displayName: terraform apply
-            inputs:
+         - task: TerraformCLI@0
+           displayName: terraform apply
+           inputs:
               command: 'apply'
               environmentServiceName: 'Terraform_aks_deploy_connection_acitve_directory'
               commandOptions: '$(Pipeline.Workspace)/terraform-manifest-out/dev-$(Build.BuildId).out'
