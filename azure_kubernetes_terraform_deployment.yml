@@ -18,12 +18,6 @@ stages:
       - job: Terrform_validation
         continueOnError: false
         steps:
-         - task: PublishPipelineArtifact@1
-           displayName: publish artifact to pipelineworks
-           inputs:
-             targetPath: '$(Pipeline.Workspace)'
-             artifact: 'terraform-manifests-out'
-             publishLocation: 'pipeline'
          - task: TerraformInstaller@0
            displayName: terraform install version
            inputs:
@@ -38,7 +32,7 @@ stages:
              backendAzureRmResourceGroupName: 'terrform_rg'
              backendAzureRmStorageAccountName: 'terraformtfstateyd'
              backendAzureRmContainerName: 'statefiles'
-             backendAzureRmKey: 'dev-terraform.tfstate'
+             backendAzureRmKey: 'devops.terraform.tfstate'
              allowTelemetryCollection: false
             
          - task: TerraformCLI@0
@@ -68,7 +62,7 @@ stages:
              backendAzureRmResourceGroupName: 'terrform_rg'
              backendAzureRmStorageAccountName: 'terraformtfstateyd'
              backendAzureRmContainerName: 'statefiles'
-             backendAzureRmKey: 'devops-terraform.tfstate'
+             backendAzureRmKey: 'devops.terraform.tfstate'
              allowTelemetryCollection: false
 
          - task: TerraformCLI@0
@@ -86,3 +80,18 @@ stages:
              environmentServiceName: 'Terraform_aks_deploy_connection_acitve_directory'
              commandOptions: '$(Build.BuildId)-plan.out'
              allowTelemetryCollection: false
+        
+         - task: CopyFiles@2
+           displayName: copy plan to stagging directory
+           inputs:
+            SourceFolder: '$(System.DefaultWorkingDirectory)'
+            Contents: '**'
+            TargetFolder: '$(Build.ArtifactStagingDirectory)'
+            preserveTimestamp: true
+        
+         - task: PublishBuildArtifacts@1
+           displayName: publish terraform plan
+           inputs:
+            PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+            ArtifactName: '$(Build.BuildId)-plan.out'
+            publishLocation: 'Container'
