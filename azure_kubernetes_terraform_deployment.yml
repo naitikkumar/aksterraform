@@ -47,9 +47,9 @@ stages:
              command: 'validate'
              allowTelemetryCollection: false
 
-  - stage: Terraform-deploy
+  - stage: Terraform_deploy
     jobs:
-      - job: Terraform-deploy
+      - job: Terraform_deploy
         steps:     
          - task: DownloadSecureFile@1
            name: ssh
@@ -70,4 +70,3 @@ stages:
              backendAzureRmContainerName: 'statefiles'
              backendAzureRmKey: 'dev-terraform.tfstate'
              allowTelemetryCollection: false
-             
