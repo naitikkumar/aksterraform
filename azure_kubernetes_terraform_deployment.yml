@@ -47,8 +47,6 @@ stages:
              command: 'validate'
              allowTelemetryCollection: false
 
-  - stage: Terraform_plan_apply
-    jobs:
       - job: Terraform_plan_apply
         continueOnError: false
         variables:
@@ -57,13 +55,6 @@ stages:
           vmImage: $(vmimage)
         steps:
           
-          - task: DownloadPipelineArtifact@2
-            displayName: download pipline artificat
-            inputs:
-              buildType: 'current'
-              artifactName: 'terraform-manifest-out'
-              targetPath: '$(Pipeline.Workspace)'
-
           - task: DownloadSecureFile@1
             name: ssh
             displayName: dowload secure ssh file
