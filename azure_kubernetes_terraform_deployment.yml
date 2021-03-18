@@ -76,7 +76,7 @@ stages:
            inputs:
             command: 'plan'
             environmentServiceName: 'Terraform_aks_deploy_connection_acitve_directory'
-            commandOptions: '-var ssh_key=$(sshkey.secureFilePath) -out $(Build.ArtifactStagingDirectory)/$(Build.BuildId)-plan.out'
+            commandOptions: '-var ssh_key=$(ssh.secureFilePath) -out $(Build.ArtifactStagingDirectory)/$(Build.BuildId)-plan.out'
             allowTelemetryCollection: false
         
          - task: TerraformCLI@0
